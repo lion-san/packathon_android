@@ -3,9 +3,8 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 21
     buildToolsVersion "21.1.2"
-
     defaultConfig {
-        applicationId "com.fujitsu.jp.garaco"
+        applicationId 'com.fujitsu.jp.stadiumcoach'
         minSdkVersion 9
         targetSdkVersion 21
         versionCode 1
@@ -20,6 +19,8 @@ android {
     packagingOptions {
         exclude 'META-INF/LICENSE'
         exclude 'META-INF/NOTICE'
+    }
+    productFlavors {
     }
 }
 

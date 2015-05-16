@@ -3,90 +3,78 @@
     android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
+    android:background="#f2ffe1"
     android:paddingBottom="@dimen/activity_vertical_margin" tools:context=".MainActivity">
 
-    <AdapterViewFlipper
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/adapterViewFlipper" />
 
-    <GridLayout
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:rowCount="3"
-        android:columnCount="3">
+    <RelativeLayout
+        android:id="@+id/footer"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_alignParentBottom="true"
+        android:background="@android:color/darker_gray">
 
-        <WebView
-            android:layout_width="260dp"
-            android:layout_height="253dp"
-            android:id="@+id/webView"
-            android:layout_alignBaseline="@+id/txt1"
-            android:layout_alignBottom="@+id/txt1"
-            android:layout_alignRight="@+id/talk"
-            android:layout_alignEnd="@+id/talk"
-            android:layout_row="0"
-            android:layout_column="0"
-            android:layout_rowSpan="2" />
-
-        <SurfaceView
-            android:layout_width="243dp"
-            android:layout_height="253dp"
-            android:id="@+id/surfaceView"
-            android:focusable="false"
-            android:layout_alignParentTop="true"
-            android:layout_toLeftOf="@+id/talk"
-            android:layout_alignBottom="@+id/talk"
-            android:layout_toRightOf="@+id/webView"
-            android:layout_toEndOf="@+id/webView"
-            android:layout_row="0"
-            android:layout_column="1"
-            android:layout_rowSpan="2" />
-
-        <Button
-            android:layout_width="70dp"
-            android:layout_height="213dp"
-            android:text="Talk"
+        <ImageButton
             android:id="@+id/talk"
-            android:focusable="true"
-            android:layout_above="@+id/webView"
-            android:layout_alignRight="@+id/send"
-            android:layout_alignEnd="@+id/send"
-            android:layout_row="0"
-            android:layout_column="2" />
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:background="@android:color/transparent"
+            android:scaleType="centerInside"
+            android:src="@drawable/btn_mic"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true" />
+    </RelativeLayout>
 
-        <ToggleButton
-            android:layout_width="70dp"
-            android:layout_height="wrap_content"
-            android:text=""
-            android:id="@+id/toggleButton"
-            android:layout_row="1"
-            android:layout_column="2" />
+    <RelativeLayout
+        android:id="@+id/relativeLayout"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_above="@id/footer"
+        android:background="#f0eff4" >
 
         <EditText
-            android:layout_width="497dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/txt1"
-            android:layout_alignBottom="@+id/send"
+            android:id="@+id/editText"
+            android:textColor="#000000"
+            android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:layout_toLeftOf="@+id/send"
             android:layout_toStartOf="@+id/send"
-            android:layout_row="2"
-            android:layout_column="0"
-            android:layout_columnSpan="2" />
+            android:layout_alignTop="@+id/send"
+            android:layout_toLeftOf="@+id/send" />
 
         <Button
-            android:layout_width="70dp"
-            android:layout_height="40dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:text="送信"
+            android:textColor="@android:color/black"
             android:id="@+id/send"
-            android:layout_alignParentBottom="true"
+            android:layout_alignParentTop="true"
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
-            android:layout_row="2"
-            android:layout_column="2" />
+            android:layout_alignParentBottom="true" />
 
-    </GridLayout>
+    </RelativeLayout>
 
+    <ScrollView
+        android:id="@+id/scrollView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/relativeLayout"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true">
+
+        <LinearLayout
+            android:id="@+id/conersation_base"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="bottom"
+            android:orientation="vertical"
+            android:padding="15dp"
+            android:layout_above="@+id/relativeLayout"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
+    </ScrollView>
 
 </RelativeLayout>

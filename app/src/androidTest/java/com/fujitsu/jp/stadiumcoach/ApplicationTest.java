@@ -1,4 +1,4 @@
-package com.fujitsu.jp.garaco;
+package com.fujitsu.jp.stadiumcoach;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

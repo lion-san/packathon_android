@@ -1,4 +1,4 @@
-package com.fujitsu.jp.garaco;
+package com.fujitsu.jp.stadiumcoach;
 
 /**
  * Created by yokoi.shinya on 2015/02/18.

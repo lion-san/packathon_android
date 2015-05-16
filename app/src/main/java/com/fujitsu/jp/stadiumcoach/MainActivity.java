@@ -1,12 +1,9 @@
-package com.fujitsu.jp.garaco;
+package com.fujitsu.jp.stadiumcoach;
 
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
-import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -17,25 +14,20 @@ import android.speech.tts.TextToSpeech;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.text.SpannableStringBuilder;
-import android.util.Log;
-import android.view.ContextMenu;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
-import android.view.Window;
 import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.Toast;
-import android.hardware.Camera.Face;
-import android.hardware.Camera.FaceDetectionListener;
 import android.view.WindowManager.LayoutParams;
-import android.widget.ToggleButton;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -61,10 +53,6 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
     private MyAsyncTask task;
     private String res = null;
 
-    private Date lasttime = null;
-    private Date starttime = null;
-
-    private WebView web;
 
     //プロジェクトリスト
     private CharSequence[] items;
@@ -72,13 +60,10 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
     private ArrayList<String> pjId = new ArrayList<String>();
     AlertDialog dialog;
 
-    /** カメラのハードウェアを操作する {@link Camera} クラスです。 */
-    private Camera mCamera;
-    /** カメラのプレビューを表示する {@link SurfaceView} です。 */
-    private SurfaceView mView;
-    private CameraOverlayView mCameraOverlayView;
 
-
+    private ListItemManager sListItemManager;   // 会話表示View管理クラスオブジェクト
+    private ScrollView sScrollView;             // 会話表示のスクロールビューオブジェクト
+    private LinearLayout mBaseLayout;           // 会話表示のベースレイアウトオブジェクト
 
     @Override
     public void onInit(int status) {
@@ -138,7 +123,7 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
                     //リストの表示
                     items = list.toArray(new CharSequence[list.size()]);
                     dialog = new AlertDialog.Builder(MainActivity.this)
-                            .setTitle("Select Project")
+                            .setTitle("コーチを選んでね")
                             .setSingleChoiceItems(
                                     items,
                                     0, // Initial
@@ -181,7 +166,7 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
         context = getApplicationContext();
 
         //ボタンの押した動作
-        Button button = (Button) findViewById(R.id.talk);
+        ImageButton button = (ImageButton) findViewById(R.id.talk);
 
         //テストの押した動作
         Button send = (Button) findViewById(R.id.send);
@@ -190,7 +175,14 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
         tts = new TextToSpeech(context, this);
 
         //トグルボタン（顔認識のON/OFF）
-        ToggleButton tglbtn = (ToggleButton) findViewById(R.id.toggleButton);
+        //ToggleButton tglbtn = (ToggleButton) findViewById(R.id.toggleButton);
+
+        // 会話表示エリア
+        mBaseLayout = (LinearLayout) findViewById(R.id.conersation_base);
+        sScrollView = (ScrollView) findViewById(R.id.scrollView);
+        //sCommandTv = (TextView) findViewById(R.id.textView1);
+        // 会話表示View管理クラス
+        sListItemManager = new ListItemManager(this, mBaseLayout);
 
 
         //ぐるぐる
@@ -200,16 +192,6 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
         progressBar.setCancelable(true);
         progressBar.show();
 
-        //WebView
-        web = (WebView) findViewById(R.id.webView);
-        web.loadUrl(StaticParams.STOP_ANIMATION);
-
-        //カメラ
-        mView = (SurfaceView) findViewById(R.id.surfaceView);
-
-        //顔検知用重畳ビュー
-        mCameraOverlayView = new CameraOverlayView(this);
-        addContentView(mCameraOverlayView, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 
 
         button.setOnClickListener(new View.OnClickListener() {
@@ -244,84 +226,21 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
             @Override
             public void onClick(View v) {
 //テストの押した動作
-                EditText txt = (EditText) findViewById(R.id.txt1);
+                EditText txt = (EditText) findViewById(R.id.editText);
                 SpannableStringBuilder sb = (SpannableStringBuilder)txt.getText();
                 String str = sb.toString();
-                executeRobot( str );
+
+                if(str.length() == 0){
+                    return;
+                }
+                else {
+                    txt.setText("");
+                    executeRobot(str);
+                }
             }
         });
 
-        //トグルボタン
-
-        tglbtn.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    // 状態が変更された
-                    Toast.makeText(MainActivity.this, "顔認識機能 : " + isChecked, Toast.LENGTH_SHORT).show();
-
-                    try {
-                        if (isChecked) {
-                            // リスナをセット  // 顔検出の開始
-                            mCamera.setFaceDetectionListener(faceDetectionListener);
-                            mCamera.startFaceDetection();
-                        } else {
-                            mCamera.setFaceDetectionListener(null);
-                            mCamera.stopFaceDetection();
-                        }
-                    }catch(Exception e){
-                        e.printStackTrace();
-                        mCamera.setFaceDetectionListener(null);
-                        Toast.makeText(MainActivity.this, "この機種は顔認識機能は使えません", Toast.LENGTH_SHORT).show();
-                    }
-
-                }
-            });
     }
-
-    private FaceDetectionListener faceDetectionListener = new FaceDetectionListener() {
-        @Override
-        public void onFaceDetection(Face[] faces, Camera camera) {
-            Log.d("onFaceDetection", "顔検出数:" + faces.length);
-            // View に渡す
-            //mCameraOverlayView.setFaces(faces);
-
-            //会話中画像を消す
-                /*if (starttime != null && (new Date()).getTime() - starttime.getTime() > 3000 ){
-                    web.loadUrl(StaticParams.STOP_ANIMATION);
-                    web.reload();
-                }*/
-
-            if(faces.length > 0){
-
-                lasttime = null;
-
-                if (!act.getFace_ditect()) {
-
-                    act.setFace_ditect(true);
-                    //tts.speak("侵入者を検知しました", TextToSpeech.QUEUE_FLUSH, null);
-                    // 画像取得
-                    //mCamera.takePicture(null, null, mPicJpgListener);
-                    executeRobot(StaticParams.FACE_DETECT);
-
-                    lasttime = null;
-                }
-            }
-            else{
-                if(lasttime == null )
-                    lasttime = new Date();
-
-                    //検知ゼロが指定ミリ秒以上続くまで、処理しない
-                else if ( ((new Date()).getTime() - lasttime.getTime() > 10000)){
-                    act.setFace_ditect(false);//フラグをもどす
-                    if( lasttime != null){
-                        long a = (( new Date()).getTime() - lasttime.getTime());
-                        Log.d("#######################", "時間（ミリ秒）"+ a);}
-                }
-
-            }
-
-        }
-    };
 
 
     // アクティビティ終了時に呼び出される
@@ -343,6 +262,7 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
 
             // トーストを使って結果を表示
             Toast.makeText(this, resultsString, Toast.LENGTH_LONG).show();
+
 
             //会話から実行
             executeRobot( resultsString );
@@ -381,7 +301,7 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
 
             @Override
             protected void onPostExecute(String json_org) {
-                String ready = "ロボナイゼーション。イニシャライズド";
+                String ready = "コーチの準備ができました";
                 tts.speak(ready, TextToSpeech.QUEUE_FLUSH, null);
                 Toast.makeText(this.getActivity(), ready, Toast.LENGTH_SHORT).show();
 
@@ -395,9 +315,9 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
 
             task.setActivity(this);
             task.setTts(this.tts);
-            act.setmCam(mCamera);
             act.setContext(context);
-            act.setWeb( web );
+            act.setsListItemManager(sListItemManager);
+            act.setsScrollView(sScrollView);
 
             //非同期処理開始
             task.execute( projectName );
@@ -413,9 +333,10 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
      */
     private void executeRobot( String resultsString ){
 
+        act.startDialogue(resultsString);
+
         //表示
         progressBar.show();
-        starttime = new Date();
 
         // サブスレッドで実行するタスクを作成
         task = new MyAsyncTask() {
@@ -468,12 +389,12 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
         };
 
         task.setActivity(this);
-        task.setTts( this.tts );
+        task.setTts( this.tts);
         //アクションハンドラの生成
         //act = new ActionHandler( this );
         act.setContext(context);
-        act.setmCam( mCamera );
-        act.setWeb( web );
+
+
 
         task.execute( resultsString );
      }
@@ -488,13 +409,13 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
         super.onPostCreate(savedInstanceState);
 
         //コールバック関数をセット
-        SurfaceHolder holder = mView.getHolder();
-        holder.addCallback(surfaceHolderCallback);
-        holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+        //SurfaceHolder holder = mView.getHolder();
+       // holder.addCallback(surfaceHolderCallback);
+       // holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
     }
 
     /** カメラのコールバックです。 */
-    private SurfaceHolder.Callback surfaceHolderCallback = new SurfaceHolder.Callback() {
+ /*   private SurfaceHolder.Callback surfaceHolderCallback = new SurfaceHolder.Callback() {
 
         @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
         @Override
@@ -502,7 +423,7 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
 
             try {
                 // 生成されたとき
-                mCamera = Camera.open(1);
+                //mCamera = Camera.open(1);
 
                 // リスナをセット  // 顔検出の開始
                 //mCamera.setFaceDetectionListener(faceDetectionListener);
@@ -510,57 +431,13 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
                 //mCamera.stopFaceDetection();
 
                 // プレビューをセットする
-                mCamera.setPreviewDisplay(holder);
+                //mCamera.setPreviewDisplay(holder);
 
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
 
-        private FaceDetectionListener faceDetectionListener = new FaceDetectionListener() {
-            @Override
-            public void onFaceDetection(Face[] faces, Camera camera) {
-                Log.d("onFaceDetection", "顔検出数:" + faces.length);
-                // View に渡す
-                //mCameraOverlayView.setFaces(faces);
-
-                //会話中画像を消す
-                /*if (starttime != null && (new Date()).getTime() - starttime.getTime() > 3000 ){
-                    web.loadUrl(StaticParams.STOP_ANIMATION);
-                    web.reload();
-                }*/
-
-                if(faces.length > 0){
-
-                    lasttime = null;
-
-                    if (!act.getFace_ditect()) {
-
-                        act.setFace_ditect(true);
-                        //tts.speak("侵入者を検知しました", TextToSpeech.QUEUE_FLUSH, null);
-                        // 画像取得
-                        //mCamera.takePicture(null, null, mPicJpgListener);
-                        executeRobot(StaticParams.FACE_DETECT);
-
-                        lasttime = null;
-                    }
-                }
-                else{
-                    if(lasttime == null )
-                        lasttime = new Date();
-
-                    //検知ゼロが指定ミリ秒以上続くまで、処理しない
-                    else if ( ((new Date()).getTime() - lasttime.getTime() > 10000)){
-                        act.setFace_ditect(false);//フラグをもどす
-                        if( lasttime != null){
-                        long a = (( new Date()).getTime() - lasttime.getTime());
-                        Log.d("#######################", "時間（ミリ秒）"+ a);}
-                    }
-
-                }
-
-            }
-        };
 
         @Override
         public void surfaceChanged(SurfaceHolder holder, int format, int width,
@@ -584,11 +461,24 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
         }
 
     };
+*/
 
+//--------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------
+@Override
+protected void onResume() {
+    super.onResume();
 
-//--------------------------------------------------------------------------------
-//--------------------------------------------------------------------------------
-//--------------------------------------------------------------------------------
+    if (mBaseLayout.getChildCount() == 0) {
+        // 初回表示のみ
+        // 初回表示が遅れる対応
+        return;
+    }
+
+    // 画面下までスクロール
+    act.scrollToBottom();
+}
 
 
     @Override
@@ -617,6 +507,8 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
     protected void onDestroy() {
         super.onDestroy();
         tts.shutdown();
+        // 音声認識サービスの終了
+        sListItemManager = null;
         //mCamera.release();
     }
 

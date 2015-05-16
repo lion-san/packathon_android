@@ -1,8 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Garaco</string>
-    <string name="hello_world">Hello world!</string>
+    <string name="app_name">STADIUM COACH</string>
     <string name="action_settings">Settings</string>
 
+    <!-- app name -->
+    <string name="label_application_info">アプリケーション情報</string>
+    <string name="label_application_settings">設定</string>
+
+    <!-- option menu -->
+    <string name="menu_appinfo">アプリ情報</string>
+    <string name="menu_appsettings">設定</string>
+
+    <!-- AppInfomationActivity -->
+    <string name="label_app_name">アプリケーション名：</string>
+    <string name="label_app_version">バージョン：</string>
+    <string name="credit">本アプリケーションは、ドコモが提供する以下のAPIを利用しています。\n・音声合成API\n・音声認識API\n・発話理解API\n・雑談対話API\n・知識Q＆A API\n\ndocomo Developer support\nLink : https://dev.smt.docomo.ne.jp/</string>
+
+    <!-- AppSettingsActivity -->
+    <string name="txt_speech_recognition_engine">音声認識API</string>
+    <string name="txt_speech_recognition_engine_FU">Powered by FUETREK</string>
+    <string name="txt_voice_engine">音声合成API</string>
+    <string name="txt_voice_engine_AI">Powered by エーアイ</string>
+    <string name="txt_voice_engine_IT">Powered by NTTアイティ</string>
+    <string name="txt_voice_name">話者：</string>
+    <string name="txt_sbm_mode">SBMモード：</string>
+    <string name="txt_setting">設定</string>
+
+    <!-- ConversationActivity -->
+    <string name="label_search_more">もっと詳しく調べる</string>
+    <string name="txt_first_message">何かご用ですか？</string>
+    <string name="txt_speech_progress">認識中です・・・</string>
+    <string name="txt_interpretation_progress">考え中です・・・</string>
+    <string name="txt_error_speech_timout">聞き取れませんでした。もう少し大きい声でお願いします。</string>
+
+    <!-- error -->
+    <string name="txt_error_interpretation">もう一度お願いします</string>
+
+    <!-- common -->
+    <string name="space">" "</string>
+    <string name="txt_stop">中止します</string>
+    <string name="txt_yes">はい</string>
+    <string name="txt_no">いいえ</string>
+    <string name="txt_button_cancel">キャンセル</string>
+
+    <!-- error dialog -->
+    <string name="msg_error_speech_no_match">認識できませんでした。</string>
+    <string name="msg_error_speech_server">接続できませんでした。</string>
+    <string name="msg_error_speech_server_no_response">サーバからのレスポンスがありませんでした。</string>
+    <string name="msg_error_interpretation_server">接続できませんでした。</string>
+    <string name="msg_error_startup_airplane">機内モード設定中のためご利用いただけません。</string>
+    <string name="msg_error_startup_not_connect">圏外のためご利用いただけません。</string>
+    <string name="msg_location_service_enable">本アプリケーションでは位置情報サービスを使用します。本アプリケーションを利用するにはGPS機能をオンにして下さい。</string>
+
+    <string name="msg_saver_unrecognized_error">もう一度お願いします。</string>
+    <string name="msg_saver_response_analisys_error">レスポンスの解析に失敗しました。</string>
+    <string name="msg_saver_error1">サーバエラー1が発生しました。</string>
+    <string name="msg_saver_error2">サーバエラー2が発生しました。</string>
+    <string name="msg_library_error">もう一度お願いします。</string>
+
+    <!-- other -->
+    <string name="content_description"></string>
 </resources>

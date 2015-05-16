@@ -1,6 +1,5 @@
-package com.fujitsu.jp.garaco;
+package com.fujitsu.jp.stadiumcoach;
 
-import android.os.AsyncTask;
 import android.util.Log;
 
 import org.apache.http.HttpResponse;

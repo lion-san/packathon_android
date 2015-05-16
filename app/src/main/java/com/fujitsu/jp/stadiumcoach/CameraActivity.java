@@ -1,16 +1,13 @@
-package com.fujitsu.jp.garaco;
+package com.fujitsu.jp.stadiumcoach;
 
 import java.util.List;
 
 import android.app.Activity;
 import android.hardware.Camera;
-import android.hardware.Camera.Face;
-import android.hardware.Camera.FaceDetectionListener;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.view.ViewGroup.LayoutParams;
 
 /**
  * カメラプレビューを表示する {@link Activity} です。

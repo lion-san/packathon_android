@@ -1,4 +1,4 @@
-package com.fujitsu.jp.garaco;
+package com.fujitsu.jp.stadiumcoach;
 
 import android.content.Context;
 import android.hardware.Camera;

@@ -1,23 +1,24 @@
-package com.fujitsu.jp.garaco;
+package com.fujitsu.jp.stadiumcoach;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.hardware.Camera;
-import android.os.Bundle;
+import android.os.AsyncTask;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
+import android.view.View;
 import android.webkit.WebView;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -28,7 +29,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -45,8 +45,12 @@ public class ActionHandler {
     private Activity activity;
     private Context context;
     private TextToSpeech tts;
-    private Camera mCam;
-    private WebView web;
+
+    private ScrollView sScrollView;             // 会話表示のスクロールビューオブジェクト
+    private LinearLayout mBaseLayout;           // 会話表示のベースレイアウトオブジェクト
+    private ListItemManager sListItemManager;
+
+
 
     private Boolean face_ditect = false;
 
@@ -67,8 +71,7 @@ public class ActionHandler {
 
             JSONArray jsons = new JSONArray(json_org);
 
-            web.loadUrl(StaticParams.ACTION_ANIMATION);
-            web.reload();
+
 
             for (int i = 0; i < jsons.length(); i++) {
                 // 予報情報を取得
@@ -112,10 +115,6 @@ public class ActionHandler {
             }
 
 
-            //アニメーションの停止
-            hideAnimation();
-
-
         } catch (JSONException e) {
             e.printStackTrace();
             Toast.makeText(activity, "Network Busy!", Toast.LENGTH_SHORT).show();
@@ -123,21 +122,6 @@ public class ActionHandler {
         }
     }
 
-    /**
-     * アニメーションをとめる
-     */
-    synchronized public void hideAnimation(){
-        //タイマーでアニメーションをオフ
-        Timer timer = new Timer();
-        AnimateController timeTask = new AnimateController();
-        timer.schedule( timeTask,  3000);
-    }
-
-    private class AnimateController extends TimerTask{
-        synchronized public void run(){
-            web.loadUrl(StaticParams.STOP_ANIMATION);
-        }
-    }
 
 
     /**
@@ -257,15 +241,55 @@ public class ActionHandler {
     synchronized private void doTalk( String param){
 
         tts.speak(param, TextToSpeech.QUEUE_ADD, null);
-        Toast.makeText(activity, param, Toast.LENGTH_SHORT).show();
+        //Toast.makeText(activity, param, Toast.LENGTH_SHORT).show();
 
+        sListItemManager.setSpeechResult(param);
+        scrollToBottom();
+
+    }
+
+    /**
+     * 雑談対話の開始
+     */
+    public void startDialogue(String msg) {
+        sListItemManager.setInterpretationProgress(msg);
+        //画面下までスクロール
+        scrollToBottom();
+
+        //new DialogueAPI(sHandler).start(msg);
+    }
+
+
+    /**
+     * スクロールビューを一番下まで自動スクロールさせる。
+     */
+    public void scrollToBottom() {
+        AsyncTask<Void, Void, Boolean> waitScroll = new AsyncTask<Void, Void, Boolean>() {
+
+            @Override
+            protected Boolean doInBackground(Void... params) {
+                try {
+                    Thread.sleep(100); // 0.1秒ディレイ
+                } catch (InterruptedException e) {
+                    // エラー表示
+                    Toast.makeText(context, e.getMessage(), Toast.LENGTH_LONG).show();
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Boolean result) {
+                sScrollView.fullScroll(View.FOCUS_DOWN);
+            };
+        };
+        waitScroll.execute();
     }
 
     synchronized private void doCamera( ){
 
         try {
             // 画像取得
-            mCam.takePicture(null, null, mPicJpgListener);
+            //mCam.takePicture(null, null, mPicJpgListener);
         }
             catch (Exception e){
                 e.printStackTrace();
@@ -332,81 +356,6 @@ public class ActionHandler {
         notificationManager.cancel( 0 );
     }
 
-    /**
-     * JPEG データ生成完了時のコールバック
-     */
-    private Camera.PictureCallback mPicJpgListener = new Camera.PictureCallback() {
-        synchronized  public void onPictureTaken(byte[] data, Camera camera) {
-            if (data == null) {
-                return;
-            }
-
-            String saveDir = Environment.getExternalStorageDirectory().getPath() + "/garaco";
-
-            // SD カードフォルダを取得
-            File file = new File(saveDir);
-
-            // フォルダ作成
-            if (!file.exists()) {
-                if (!file.mkdir()) {
-                    Log.e("Debug", "Make Dir Error");
-                }
-            }
-
-            // 画像保存パス
-            Calendar cal = Calendar.getInstance();
-            SimpleDateFormat sf = new SimpleDateFormat("yyyyMMdd_HHmmss");
-            String imgPath = saveDir + "/" + sf.format(cal.getTime()) + ".jpg";
-
-            // ファイル保存
-            FileOutputStream fos;
-            try {
-                fos = new FileOutputStream(imgPath, true);
-                fos.write(data);
-                fos.close();
-
-                // アンドロイドのデータベースへ登録
-                // (登録しないとギャラリーなどにすぐに反映されないため)
-                registAndroidDB(imgPath);
-
-            } catch (Exception e) {
-                Log.e("Debug", e.getMessage());
-            }
-
-            fos = null;
-
-            // takePicture するとプレビューが停止するので、再度プレビュースタート
-            mCam.startPreview();
-
-           // mIsTake = false;
-        }
-    };
-
-    /**
-     * アンドロイドのデータベースへ画像のパスを登録
-     * @param path 登録するパス
-     */
-    private void registAndroidDB(String path) {
-        // アンドロイドのデータベースへ登録
-        // (登録しないとギャラリーなどにすぐに反映されないため)
-        ContentValues values = new ContentValues();
-        ContentResolver contentResolver = context.getContentResolver();
-        values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
-        values.put("_data", path);
-        contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
-    }
-
-
-    /**
-     *
-     */
-    protected void cameraDestroy() {
-
-        if (mCam != null) {
-            mCam.release();
-            mCam = null;
-        }
-    }
 
     public Activity getActivity() {
         return activity;
@@ -432,13 +381,6 @@ public class ActionHandler {
         this.context = context;
     }
 
-    public Camera getmCam() {
-        return mCam;
-    }
-
-    public void setmCam(Camera mCam) {
-        this.mCam = mCam;
-    }
 
     public Boolean getFace_ditect() {
         return face_ditect;
@@ -448,11 +390,12 @@ public class ActionHandler {
         this.face_ditect = face_ditect;
     }
 
-    public WebView getWeb() {
-        return web;
+
+    public  void setsScrollView(ScrollView sScrollView) {
+        this.sScrollView = sScrollView;
     }
 
-    public void setWeb(WebView web) {
-        this.web = web;
+    public void setsListItemManager(ListItemManager sListItemManager) {
+        this.sListItemManager = sListItemManager;
     }
 }
