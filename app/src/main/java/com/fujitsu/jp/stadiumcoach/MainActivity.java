@@ -1,6 +1,7 @@
 package com.fujitsu.jp.stadiumcoach;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
@@ -15,6 +16,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.text.SpannableStringBuilder;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SurfaceHolder;
@@ -64,6 +66,8 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
     private ListItemManager sListItemManager;   // 会話表示View管理クラスオブジェクト
     private ScrollView sScrollView;             // 会話表示のスクロールビューオブジェクト
     private LinearLayout mBaseLayout;           // 会話表示のベースレイアウトオブジェクト
+
+    private  WebView wv;
 
     @Override
     public void onInit(int status) {
@@ -191,7 +195,6 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
         progressBar.setMessage("処理を実行中しています");
         progressBar.setCancelable(true);
         progressBar.show();
-
 
 
         button.setOnClickListener(new View.OnClickListener() {

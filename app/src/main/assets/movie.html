@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset=utf-8>
+    <title>video要素、audio要素をJavaScriptから操作する　サンプル</title>
+</head>
+<body>
+<label id="kanryou"/>
+<video id="video" width="300" height="300" onClick="playVideo()">
+    <source src="">
+</video>
+<script type="text/javascript">
+var v = document.getElementById("video");
+function getDuration() {
+    //動画の長さ（秒）を表示
+    document.getElementById("nagasa").innerHTML = v.duration;
+}
+
+
+function test(url){
+
+   document.getElementById("kanryou").innerHTML = url;
+  load_movie(url);
+
+}
+
+function load_movie(url){
+
+    document.getElementById("kanryou").innerHTML = url;
+
+    var parser = document.createElement('a');
+    parser.href = url;
+    var position = parseFloat(parser.hash.substr(1));
+    v.src = url;
+    v.currentTime = position;
+    v.play();
+}
+function playVideo() {
+    //再生完了の表示をクリア
+    // document.getElementById("kanryou").innerHTML = "";
+    //動画を再生
+    v.play();
+    //現在の再生位置（秒）を表示
+    // v.addEventListener("timeupdate", function(){
+    //     document.getElementById("ichi").innerHTML = v.currentTime;
+    // }, false);
+    //再生完了を知らせる
+    v.addEventListener("ended", function(){
+        document.getElementById("kanryou").innerHTML = "動画の再生が完了しました。";
+    }, false);
+}
+function pauseVideo() {
+    //動画を一時停止
+    v.pause();
+    console.log(v.currentTime);
+}
+function upVolume() {
+    //音量を上げる
+    v.volume = v.volume + 0.25;
+}
+function downVolume() {
+    //音量を下げる
+    v.volume = v.volume - 0.25;
+}
+    </script>
+
+</body>
+</html>

@@ -169,6 +169,10 @@ public class ActionHandler {
                 doApplication(param);
                 break;
 
+            case "media":
+                doMedia(param);
+                break;
+
             default:
                 break;
         }
@@ -315,10 +319,18 @@ public class ActionHandler {
         } catch (Exception e) {
             Toast.makeText(activity, "対象のアプリがありません", Toast.LENGTH_SHORT).show();
         }
-
-
     }
 
+
+    synchronized private void doMedia( String param ){
+
+        try {
+            sListItemManager.setMedia(param);
+            scrollToBottom();
+        } catch (Exception e) {
+            Toast.makeText(activity, "動画のロードに失敗しました", Toast.LENGTH_SHORT).show();
+        }
+    }
 
     /**
      *

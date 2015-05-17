@@ -6,10 +6,15 @@
 
 package com.fujitsu.jp.stadiumcoach;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -48,6 +53,8 @@ public class ListItemManager {
     // 発話があった場合に削除するため保持しておくView
     private View mOneTimeView = null;
 
+    private WebView wv;
+
     public ListItemManager(Context context, LinearLayout baseLayout) {
         mContext = context;
         mBaseLayout = baseLayout;
@@ -61,7 +68,7 @@ public class ListItemManager {
         String message = mContext.getString(R.string.txt_first_message);
         View view = getLatestView();
         if (view == null) {
-            setTextItem(message, LIST_TYPE_SYSTEM, ITEM_TYPE_FIRST_MSG, false);
+            setTextItem(message, LIST_TYPE_SYSTEM, ITEM_TYPE_FIRST_MSG, false, false, false);
         }
         //既に表示がされている場合は、初回メッセージを表示しない
     }
@@ -80,7 +87,7 @@ public class ListItemManager {
 
         //更新対象がなかった場合は新規に追加する
         if (!updata) {
-            setTextItem(progress, LIST_TYPE_SYSTEM, ITEM_TYPE_SPEECH_PROGRESS, false);
+            setTextItem(progress, LIST_TYPE_SYSTEM, ITEM_TYPE_SPEECH_PROGRESS, false, false, false);
         }
     }
 
@@ -90,7 +97,7 @@ public class ListItemManager {
      */
     public void setSpeechResult(String text) {
         removeTextItem(ITEM_TYPE_SPEECH_PROGRESS);
-        setTextItem(text, LIST_TYPE_USER, ITEM_TYPE_SPEECH_RESULT, false);
+        setTextItem(text, LIST_TYPE_USER, ITEM_TYPE_SPEECH_RESULT, false, true, false);
     }
 
     /**
@@ -112,7 +119,15 @@ public class ListItemManager {
      */
     public void setInterpretationProgress(String message) {
         //String message = mContext.getString(R.string.txt_interpretation_progress);
-        setTextItem(message, LIST_TYPE_SYSTEM, ITEM_TYPE_INTERPRETATION_ROGRESS, false);
+        setTextItem(message, LIST_TYPE_SYSTEM, ITEM_TYPE_INTERPRETATION_ROGRESS, false, false, false);
+    }
+
+    /**
+     * 意図解釈中テキストを表示する。
+     */
+    public void setMedia(String message) {
+        //String message = mContext.getString(R.string.txt_interpretation_progress);
+        setTextItem(message, LIST_TYPE_SYSTEM, ITEM_TYPE_INTERPRETATION_ROGRESS, false, true, true);
     }
 
     /**
@@ -126,7 +141,7 @@ public class ListItemManager {
                 ITEM_TYPE_INTERPRETATION_ROGRESS);
 
         if (!updata) {
-            setTextItem(text, LIST_TYPE_SYSTEM, ITEM_TYPE_INTERPRETATION_RESULT, isDialog);
+            setTextItem(text, LIST_TYPE_SYSTEM, ITEM_TYPE_INTERPRETATION_RESULT, isDialog, true, false);
         }
     }
 
@@ -144,8 +159,46 @@ public class ListItemManager {
      * @param itemType 表示の種別
      * @param isDialog 対話中かどうか（システムの発話のみ）
      */
-    private void setTextItem(String text, int listType, int itemType, boolean isDialog) {
-        View item = mInflater.inflate(R.layout.item_text, mBaseLayout, false);
+    @TargetApi(Build.VERSION_CODES.KITKAT)
+    private void setTextItem(String text, int listType, int itemType, boolean isDialog, boolean reply, boolean media) {
+        View item;
+
+        if(media){
+            item = mInflater.inflate(R.layout.item_text3, mBaseLayout, false);
+            wv = (WebView)item.findViewById(R.id.webViewMedia);
+
+            // カスタムWebViewを設定する
+            wv.setWebViewClient(new CustomWebView(text));
+
+            //textをセット
+            wv.loadUrl("file:///android_asset/movie.html");
+
+           // wv.getSettings().setJavaScriptEnabled(true);
+            WebSettings settings = wv.getSettings();
+            settings.setJavaScriptEnabled(true);
+            //wv.evaluateJavascript("javascript:load_movie(" + text + ")", null);
+            //String script = "javascript:load_movie('%s');";
+            //wv.loadUrl( String.format( script, text ) );
+
+            RelativeLayout.LayoutParams params =
+                    (RelativeLayout.LayoutParams) wv.getLayoutParams();
+
+            params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, 1);
+            wv.setBackgroundResource(R.drawable.bg_active);
+            mBaseLayout.addView(item);
+            return;
+        }
+        else if(!reply) {
+            item = mInflater.inflate(R.layout.item_text, mBaseLayout, false);
+
+        }
+
+        else{
+            item = mInflater.inflate(R.layout.item_text2, mBaseLayout, false);
+            wv = (WebView)item.findViewById(R.id.webView);
+            wv.loadUrl("file:///android_asset/action.html");
+        }
+
         item.setTag(itemType);
         TextView textView = (TextView) item.findViewById(R.id.speech_text);
         RelativeLayout.LayoutParams params =
@@ -159,11 +212,20 @@ public class ListItemManager {
             //システムの発話（対話中）の場合
             params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, 1);
             textView.setBackgroundResource(R.drawable.bg_active);
-        } else {
+        }
+         else if (isDialog)
+        {
+            //システムの発話（対話中）の場合
+            params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, 1);
+            textView.setBackgroundResource(R.drawable.bg_active);
+        }
+
+        else {
             //システムの発話の場合
             params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, 1);
             textView.setBackgroundResource(R.drawable.bg_system);
         }
+
         textView.setText(text);
         mBaseLayout.addView(item);
     }
@@ -253,7 +315,7 @@ public class ListItemManager {
 
         //更新されなかった場合は新規に表示
         if (!updata) {
-            setTextItem(progress, LIST_TYPE_SYSTEM, ITEM_TYPE_SPEECH_ERROR, false);
+            setTextItem(progress, LIST_TYPE_SYSTEM, ITEM_TYPE_SPEECH_ERROR, false, false, false);
         }
     }
 
@@ -285,6 +347,35 @@ public class ListItemManager {
      * システムのメッセージを表示する。
      */
     public void setSystemMessage(String text) {
-        setTextItem(text, LIST_TYPE_SYSTEM, ITEM_TYPE_SYSTEM_MSG, false);
+        setTextItem(text, LIST_TYPE_SYSTEM, ITEM_TYPE_SYSTEM_MSG, false, false, false);
+    }
+
+    /**
+     * WebViewClientクラスを継承したカスタムWebView（内部クラス）
+     *
+     */
+    private class CustomWebView extends WebViewClient {
+
+        private String text;
+
+        CustomWebView(String text){
+            this.text = text;
+        }
+
+        //ページの読み込み完了
+        @Override
+        public void onPageFinished(WebView view, String url) {
+
+            WebSettings settings = wv.getSettings();
+            settings.setJavaScriptEnabled(true);
+
+            // HTML内に埋め込まれている「callJavaScript()」関数を呼び出す
+            //wv.loadUrl("javascript:callJavaScript()");
+            //wv.evaluateJavascript("javascript:load_movie(" + text + ")", null);
+            //wv.getSettings().setJavaScriptEnabled(true);
+            //String script = "javascript:load_movie('%s');";
+            String script = "javascript:test('%s');";
+            wv.loadUrl( String.format( script, text ) );
+        }
     }
 }

@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.fujitsu.jp.stadiumcoach" >
 
-    <uses-sdk android:minSdkVersion="14" android:targetSdkVersion="19" />
+    <uses-sdk android:minSdkVersion="19" android:targetSdkVersion="19" />
 
     //接続を許可
     <uses-permission android:name="android.permission.INTERNET"/>
