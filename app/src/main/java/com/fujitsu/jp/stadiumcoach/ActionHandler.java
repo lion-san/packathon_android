@@ -17,6 +17,7 @@ import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.View;
 import android.webkit.WebView;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.Toast;
@@ -120,6 +121,7 @@ public class ActionHandler {
             Toast.makeText(activity, "Network Busy!", Toast.LENGTH_SHORT).show();
             return;
         }
+
     }
 
 
@@ -284,6 +286,10 @@ public class ActionHandler {
             @Override
             protected void onPostExecute(Boolean result) {
                 sScrollView.fullScroll(View.FOCUS_DOWN);
+
+                //テキストにフォーカス
+                EditText txt = (EditText) activity.findViewById(R.id.editText);
+                txt.requestFocus();
             };
         };
         waitScroll.execute();

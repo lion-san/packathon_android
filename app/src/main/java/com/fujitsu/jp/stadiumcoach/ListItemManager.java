@@ -15,6 +15,8 @@ import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -171,12 +173,12 @@ public class ListItemManager {
             wv.setWebViewClient(new CustomWebView(text));
 
             //textをセット
-            wv.loadUrl("file:///android_asset/movie.html");
+            wv.loadUrl("file:///android_asset/media.html");
 
            // wv.getSettings().setJavaScriptEnabled(true);
             WebSettings settings = wv.getSettings();
             settings.setJavaScriptEnabled(true);
-            //wv.evaluateJavascript("javascript:load_movie(" + text + ")", null);
+           // wv.evaluateJavascript("javascript:load_audio(" + text + ")", null);
             //String script = "javascript:load_movie('%s');";
             //wv.loadUrl( String.format( script, text ) );
 
@@ -195,8 +197,13 @@ public class ListItemManager {
 
         else{
             item = mInflater.inflate(R.layout.item_text2, mBaseLayout, false);
-            wv = (WebView)item.findViewById(R.id.webView);
-            wv.loadUrl("file:///android_asset/action.html");
+
+
+            //wv = (WebView)item.findViewById(R.id.webView);
+            //wv.loadUrl("file:///android_asset/thumbnail.html");
+
+            ImageView iv = (ImageView)item.findViewById(R.id.imageView);
+            iv.setImageResource(R.drawable.hanasu);
         }
 
         item.setTag(itemType);
@@ -374,7 +381,7 @@ public class ListItemManager {
             //wv.evaluateJavascript("javascript:load_movie(" + text + ")", null);
             //wv.getSettings().setJavaScriptEnabled(true);
             //String script = "javascript:load_movie('%s');";
-            String script = "javascript:test('%s');";
+            String script = "javascript:load_audio('%s');";
             wv.loadUrl( String.format( script, text ) );
         }
     }

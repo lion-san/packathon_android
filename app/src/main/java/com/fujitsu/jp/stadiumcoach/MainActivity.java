@@ -228,6 +228,7 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
         send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
 //テストの押した動作
                 EditText txt = (EditText) findViewById(R.id.editText);
                 SpannableStringBuilder sb = (SpannableStringBuilder)txt.getText();
@@ -396,8 +397,6 @@ public class MainActivity extends ActionBarActivity implements TextToSpeech.OnIn
         //アクションハンドラの生成
         //act = new ActionHandler( this );
         act.setContext(context);
-
-
 
         task.execute( resultsString );
      }
