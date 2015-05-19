@@ -7,11 +7,15 @@
     <script language="JavaScript">
         var load_audio = function(url){
           document.getElementById("audio").src = url
+
+          var audio = new Audio(url);
+          audio.load();
+          audio.play();
         }
     </script>
 
 </head>
 <body>
-  <audio id="audio" src="" controls></audio>
+  <audio id="audio" src="" controls autoplay></audio>
 </body>
 </html>

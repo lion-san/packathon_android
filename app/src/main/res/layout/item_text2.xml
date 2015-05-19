@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/sp_recg_dialog"
     android:layout_width="match_parent"
-    android:layout_height="100px"
+    android:layout_height="110px"
     android:layout_marginTop="5dp" >
 
     <!-- 会話テキスト -->
@@ -37,8 +37,8 @@
  />
 
     <ImageView
-        android:layout_width="120px"
-        android:layout_height="120px"
+        android:layout_width="85px"
+        android:layout_height="100px"
         android:id="@+id/imageView"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
